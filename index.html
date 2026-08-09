@@ -1398,18 +1398,25 @@ function loadMarkers() {
             "dndMapMarkers"
         );
 
-
     if (!saved) {
         return;
     }
 
-
     try {
 
-        markers =
+        const savedMarkers =
             JSON.parse(saved);
 
-        renderMarkers();
+        // Only use localStorage if needed.
+        // Do not overwrite embedded markers automatically.
+
+        if (
+            Array.isArray(savedMarkers) &&
+            savedMarkers.length > 0
+        ) {
+            markers = savedMarkers;
+            renderMarkers();
+        }
 
     } catch {
 
@@ -1418,9 +1425,7 @@ function loadMarkers() {
         );
 
     }
-
 }
-
 
 /* =====================================================
    EXPORT MARKERS
@@ -1488,7 +1493,7 @@ saveEmbeddedButton.addEventListener(
         // Get the complete current HTML document.
         // The current marker list is then written into the
         // embeddedMarkers array before downloading a new HTML.
-        let source =
+        let source = 
             "<!DOCTYPE html>\n" +
             document.documentElement.outerHTML;
 
@@ -1499,8 +1504,10 @@ saveEmbeddedButton.addEventListener(
                 4
             );
 
-        const markerPattern =
-            /const embeddedMarkers\s*=\s*\[[\s\S]*?\];/;
+        const replacement =
+    "const embeddedMarkers = " +
+    currentMarkers +
+    ";";
 
         if (!markerPattern.test(source)) {
 
